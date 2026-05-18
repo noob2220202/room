@@ -153,26 +153,24 @@ def fmt_user(u) -> str:
     return f"{name} (@{uname})" if uname else f"{name} [ID: {u.id}]"
 
 
+async def _is_admin(uid: int, cid: int, context: ContextTypes.DEFAULT_TYPE) -> bool:
+    try:
+        admins = await context.bot.get_chat_administrators(cid)
+        return any(a.user.id == uid for a in admins)
+    except TelegramError:
+        return False
+
+
 async def admin_or_manager(update: Update, context: ContextTypes.DEFAULT_TYPE) -> bool:
     uid = update.effective_user.id
     cid = update.effective_chat.id
-    try:
-        m = await context.bot.get_chat_member(cid, uid)
-        if m.status in (ChatMemberStatus.OWNER, ChatMemberStatus.ADMINISTRATOR):
-            return True
-    except TelegramError:
-        pass
+    if await _is_admin(uid, cid, context):
+        return True
     return is_manager(uid, cid)
 
 
 async def only_admin(update: Update, context: ContextTypes.DEFAULT_TYPE) -> bool:
-    uid = update.effective_user.id
-    cid = update.effective_chat.id
-    try:
-        m = await context.bot.get_chat_member(cid, uid)
-        return m.status in (ChatMemberStatus.OWNER, ChatMemberStatus.ADMINISTRATOR)
-    except TelegramError:
-        return False
+    return await _is_admin(update.effective_user.id, update.effective_chat.id, context)
 
 
 async def find_user(context: ContextTypes.DEFAULT_TYPE, token: str, chat_id: int):
