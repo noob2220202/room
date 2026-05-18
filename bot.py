@@ -7,6 +7,10 @@ import os
 import sqlite3
 from datetime import datetime
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
 from telegram import Chat, Update
 from telegram.constants import ChatMemberStatus
 from telegram.error import BadRequest, Forbidden, TelegramError
