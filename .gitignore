@@ -1,0 +1,4 @@
+.env
+banbot.db
+__pycache__/
+*.pyc
